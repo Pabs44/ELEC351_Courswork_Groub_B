@@ -6,6 +6,7 @@
 
     class UOP_MSB_SENSORDATA {
     private:
+        
         //Light Levels
         AnalogIn ldr_sensors;
         //Environmental Sensor
@@ -16,9 +17,8 @@
         DigitalOut matrix_spi_oe;           //Output Enable ACTIVE LOW
    
         public:
-        UOP_MSB_SENSORDATA() : ldr_sensors(AN_LDR_PIN), matrix_spi(PC_12, PC_11, PC_10), matrix_spi_cs(PB_6), matrix_spi_oe(PB_12){
-            //Constructor
-        }
+        //Constructor
+        UOP_MSB_SENSORDATA() : ldr_sensors(AN_LDR_PIN), matrix_spi(PC_12, PC_11, PC_10), matrix_spi_cs(PB_6), matrix_spi_oe(PB_12){}
 
         void read_sensors();
 
