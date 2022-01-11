@@ -8,7 +8,7 @@ void read_sensor_thread();
 void thread_test();
 
 Thread sensorThread(osPriorityHigh);
-Thread testThread;
+Thread testThread(osPriorityBelowNormal);
 
 int main() {
     
