@@ -6,9 +6,9 @@
 
 FIFO env_FIFO;
 
-Thread sensorThread(osPriorityHigh);
+//Thread sensorThread(osPriorityHigh);
 Thread testThread(osPriorityBelowNormal);
-Thread FIFOwrite, FIFOread, alarmThread;
+//Thread FIFOwrite, FIFOread, alarmThread;
 
 void thread_test(){
     while(true){
@@ -18,14 +18,13 @@ void thread_test(){
 }
 
 //run the sensor reading
-void read_sensor_thread(){
+/*void read_sensor_thread(){
     env_FIFO.FIFO_board.read_sensors();
 }
 //run alarm check
 void alarm_thread(){
     env_FIFO.FIFO_board.alarm();
 }
-
 //producer
 void write_FIFO_thread(){
     env_FIFO.write_FIFO();
@@ -33,13 +32,13 @@ void write_FIFO_thread(){
 //consumer
 void read_FIFO_thread(){
     env_FIFO.read_FIFO();
-}
+}*/
 
 int main() {
     
-    sensorThread.start(read_sensor_thread);
-    alarmThread.start(alarm_thread);
-    FIFOwrite.start(write_FIFO_thread);
-    FIFOread.start(read_FIFO_thread);
+    //sensorThread.start(read_sensor_thread);
+    //alarmThread.start(alarm_thread);
+    //FIFOwrite.start(write_FIFO_thread);
+    //FIFOread.start(read_FIFO_thread);
     //testThread.start(thread_test);
 }

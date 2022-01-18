@@ -1,12 +1,14 @@
 #ifndef __FIFO__
 #define __FIFO__
 
+#include "mbed.h"
 #include "uop_msb.h"
 #include "SD_WRAPPER.hpp"
+#include <cstdint>
 using namespace uop_msb;
 
     const int _FIFO_size = 6;
-    static int _startWrite;
+    //static int _startWrite;
     static ENVDATA _env_data;
     static ENVDATA _env_data_arr[_FIFO_size];
     
@@ -24,7 +26,9 @@ using namespace uop_msb;
     };
 
     class UOP_MSB_SENSORDATA {
-    private:
+    protected:
+        uint32_t START_WRITE = 1;
+        Thread sensorThread, writeThread, readThread, alarmThread;
         //Light Levels
         AnalogIn ldr_sensors;
         //Environmental Sensor
@@ -35,35 +39,57 @@ using namespace uop_msb;
         DigitalOut matrix_spi_oe;           //Output Enable ACTIVE LOW
         //User Switch
         DigitalIn userButton;
+        //temperature upper/lower
+        float t_up = 27;
+        float t_low = 18;
+        //pressure upper/lower
+        float p_up = 1200;
+        float p_low = 900;
+        //light level upper/lower
+        float l_up = 0.4;
+        float l_low = 0.1;
 
+    /*protected:
+        Thread sensorThread;
+        Thread writeThread, readThread, alarmThread;
+    */
     public:
         //Constructor
         UOP_MSB_SENSORDATA() : 
-        ldr_sensors(AN_LDR_PIN), matrix_spi(PC_12, PC_11, PC_10), matrix_spi_cs(PB_6), matrix_spi_oe(PB_12), userButton(USER_BUTTON){}
+        ldr_sensors(AN_LDR_PIN), matrix_spi(PC_12, PC_11, PC_10), matrix_spi_cs(PB_6), matrix_spi_oe(PB_12), userButton(USER_BUTTON){
+            alarmThread.start(callback(this, &UOP_MSB_SENSORDATA::alarm));
+        }
 
-        void read_sensors();
         void alarm();
+
     };
 
-    class FIFO : public UOP_MSB_SENSORDATA {
-    public:
+    class FIFO : UOP_MSB_SENSORDATA {
+    private:
         Mutex sdLock;
         Semaphore samplesInBuffer;
         Semaphore spaceInBuffer;
 
-        Queue<FIFOmessage_t, _FIFO_size> FIFO_queue;
-        MemoryPool<FIFOmessage_t, _FIFO_size> memPool;
+        Mail<FIFOmessage_t, _FIFO_size> FIFO_mail;
 
         UOP_MSB_SENSORDATA FIFO_board;
 
         SD_WRAPPER SD_abstract;
 
-        //Constructor
-        FIFO() : 
-        sdLock(), samplesInBuffer(), spaceInBuffer(_FIFO_size), FIFO_queue(), memPool(), FIFO_board(){}
+    public:
 
         void write_FIFO();
         void read_FIFO();
+        void read_sensors();
+
+        //Constructor
+        FIFO() : 
+        sdLock(), samplesInBuffer(), spaceInBuffer(_FIFO_size), FIFO_board(){
+            sensorThread.start(callback(this, &FIFO::read_sensors));
+            sensorThread.set_priority(osPriorityHigh);
+            writeThread.start(callback(this, &FIFO::write_FIFO));
+            readThread.start(callback(this, &FIFO::read_FIFO));
+        }
     };
 
     /*class SD {
