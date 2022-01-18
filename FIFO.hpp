@@ -27,7 +27,7 @@ using namespace uop_msb;
 
     class UOP_MSB_SENSORDATA {
     protected:
-        uint32_t START_WRITE = 1;
+        typedef enum {START_WRITE=1, NO_PRESS=2} FIFO_EVENTS;
         Thread sensorThread, writeThread, readThread, alarmThread;
         //Light Levels
         AnalogIn ldr_sensors;
@@ -49,10 +49,6 @@ using namespace uop_msb;
         float l_up = 0.4;
         float l_low = 0.1;
 
-    /*protected:
-        Thread sensorThread;
-        Thread writeThread, readThread, alarmThread;
-    */
     public:
         //Constructor
         UOP_MSB_SENSORDATA() : 

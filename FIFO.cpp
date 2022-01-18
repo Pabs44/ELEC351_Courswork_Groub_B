@@ -96,16 +96,17 @@ void FIFO::read_sensors(){
 void UOP_MSB_SENSORDATA::alarm(){
     while(true){
         int buttonCheck = userButton.read();
-        //check if boundaries are passed
-        if(_env_data.temp < t_low && _env_data.temp > t_up) printf("\ntemperature alarm");
-        if(_env_data.pres < p_low && _env_data.pres > p_up) printf("\npressure alarm");
-        if(_env_data.light < l_low && _env_data.light > l_up) printf("\nlight level alarm");
         //check if button has been pressed and cancel alarm for 1 minute
-        if(buttonCheck == 1){
-            ThisThread::sleep_for(60s);
+        if(buttonCheck == 0){
+            //check if boundaries are passed
+            if(_env_data.temp < t_low || _env_data.temp > t_up) printf("\ntemperature alarm");
+            if(_env_data.pres < p_low || _env_data.pres > p_up) printf("\npressure alarm");
+            if(_env_data.light < l_low || _env_data.light > l_up) printf("\nlight level alarm");
+            ThisThread::sleep_for(2s);
+        }else{
             cout << "\nPausing alarm";
+            ThisThread::sleep_for(60s);
         }
-        ThisThread::sleep_for(50ms);
     }
 }
 
@@ -113,9 +114,9 @@ void FIFO::write_FIFO(){
     while(true){
         ThisThread::flags_wait_all(START_WRITE);
         cout << "\nWriting";
-        spaceInBuffer.try_acquire_for(60s);
-        sdLock.lock();
 
+        spaceInBuffer.try_acquire_for(10s);
+        sdLock.lock();
         //allocate block from memPool
         FIFOmessage_t* write_FIFO = FIFO_mail.try_alloc();
         if(write_FIFO == NULL){
@@ -149,9 +150,7 @@ void FIFO::read_FIFO(){
     while(true){
         if(FIFO_mail.full()){
             SD_abstract.mount();
-
             cout << "\nReading" << endl;
-            //printf("\nSamples: %u", FIFO_queue.count());
 
             FIFOmessage_t* read_FIFO = FIFO_mail.try_get_for(60s); //block in case FIFO is empty
             _env_data_arr[0] = read_FIFO->_msg_env_data;
@@ -179,6 +178,7 @@ void FIFO::read_FIFO(){
                 SD_abstract.dump_samples();
             }else{
                 cout << "\nError: Couldn't Dump" << endl;
+                return;
             }
             //SD::read_sdcard();
             SD_abstract.wipe();
