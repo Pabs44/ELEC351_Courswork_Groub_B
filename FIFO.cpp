@@ -128,7 +128,10 @@ void FIFO::write_FIFO(){
         if(write_FIFO == NULL){
             //return error (out of memory)
             cout << "\nError: FIFO Full" << endl;
+            traf1RedLED = 1;
             return;
+        }else{
+            traf1RedLED = 0;
         }
 
         //fill in data (temperature, pres and light level)

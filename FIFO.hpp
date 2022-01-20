@@ -40,6 +40,7 @@ using namespace uop_msb;
         Thread alarmThread;
         //Light Levels
         AnalogIn ldr_sensors;
+        DigitalOut traf1RedLED;
         //Environmental Sensor
         uop_msb::EnvSensor env;
         //LED Matrix
@@ -61,7 +62,7 @@ using namespace uop_msb;
     public:
         //Constructor
         UOP_MSB_SENSORDATA() : 
-        ldr_sensors(AN_LDR_PIN), matrix_spi(PC_12, PC_11, PC_10), matrix_spi_cs(PB_6), matrix_spi_oe(PB_12), userButton(USER_BUTTON){
+        ldr_sensors(AN_LDR_PIN), matrix_spi(PC_12, PC_11, PC_10), matrix_spi_cs(PB_6), matrix_spi_oe(PB_12), userButton(USER_BUTTON), traf1RedLED(TRAF_RED1_PIN,1){
             alarmThread.start(callback(this, &UOP_MSB_SENSORDATA::alarm));
         }
 
