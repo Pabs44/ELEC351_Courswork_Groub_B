@@ -3,8 +3,17 @@ ELEC351
 Authors: Pablo Pelaez and Angus McDowall
 Group: B
 ****************************************
+FILE CONTAINS:
 void alarm() - Function that handles an alarm thread, outputting alarms when temp/pres/lux exceed certain boundaries
-void write_FIFO() - Function that handles a thread writing to the FIFO, taking an 
+void write_FIFO() - Function that handles a thread writing to the FIFO
+void read_FIFO() - Function that handles a thread reading from the FIFO and then writing data to an abstracted SD card
+void read_sensors() - Function that handles a thread reading from the sensors on the board, then writing the values to
+an array used by the FIFO
+void latest() - Function that returns the latest sample from the FIFO
+void buffered() - Function that returns the number of samples in the FIFO
+void flush() - Function that writes all current samples in the FIFO to the SD card and empties the FIFO
+void set_high() - Function that sets upper boundaries from temp/pres/lux
+void set_low() - same as set_high but with the lower boundaries
 */
 
 #ifndef __FIFO__
@@ -17,7 +26,6 @@ void write_FIFO() - Function that handles a thread writing to the FIFO, taking a
 using namespace uop_msb;
 
     const int _FIFO_size = 6;
-    //static int _startWrite;
     static ENVDATA _env_data;
     static ENVDATA _env_data_arr[_FIFO_size];
     
