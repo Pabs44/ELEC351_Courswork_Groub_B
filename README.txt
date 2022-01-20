@@ -15,7 +15,7 @@ FIFO.CPP
 read_FIFO and write_FIFO functions read and write data to the FIFO in their own threads
 Writing to the FIFO doesn’t block any other tasks
 LINE 158 Blocks if the FIFO is empty
-
+Writing to a full FIFO is a critial error there for a Red light is turned on
 4.
 Temperature, pressure and light max and min values have been implemented and can be changed by typing set_low() or set_high()
 The console will ask for each value in turn
@@ -42,6 +42,8 @@ flush()
 set_low() - explained in 4.
 set_high() - explained in 4.
 All functions should work as intended 
+Video link:
+https://www.youtube.com/watch?v=OfHamvvxPC4
 
 8.
 N/A
@@ -50,6 +52,6 @@ N/A
 Locks and Semaphores use so critical processes don’t become interrupted 
 
 10.
-N/A
+Writing to a full FIFO is a critial error there for a Red light is turned on
 
 */
