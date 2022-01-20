@@ -1,3 +1,9 @@
+/*
+ELEC351
+Authors: Pablo Pelaez and Angus McDowall
+Group: B
+*/
+
 #include "FIFO.hpp"
 #include <stdio.h>
 #include <iostream>

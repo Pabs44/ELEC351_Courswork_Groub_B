@@ -1,3 +1,9 @@
+/*
+ELEC351
+Authors: Pablo Pelaez and Angus McDowall
+Group: B
+*/
+
 #ifndef __FIFO__
 #define __FIFO__
 

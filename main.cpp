@@ -1,3 +1,9 @@
+/*
+ELEC351
+Authors: Pablo Pelaez and Angus McDowall
+Group: B
+*/
+
 #include "mbed.h"
 #include "FIFO.hpp"
 #include <cstdint>
@@ -25,15 +31,24 @@ void serial_input_thread(){
         if(buff[len-1] == ')'){
             if(buff[0] == 'l'){
                 cout << "\nrunning latest()";
+                for(int idx = 0; idx <= max_len; idx++) buff[idx] = 0;
+                ThisThread::sleep_for(100ms);
+                len = 0;
                 env_FIFO.latest();
             }else if(buff[0] == 'b'){
                 cout << "\nrunning buffered()";
+                for(int idx = 0; idx <= max_len; idx++) buff[idx] = 0;
+                len = 0;
                 env_FIFO.buffered();
             }else if(buff[0] == 'f'){
                 cout << "\nrunning flushed()";
+                for(int idx = 0; idx <= max_len; idx++) buff[idx] = 0;
+                len = 0;
                 env_FIFO.flush();
             }else if (buff[0] == 's' && buff[4] == 'l'){
                 cout << "\nrunning set_low()";
+                for(int idx = 0; idx <= max_len; idx++) buff[idx] = 0;
+                len = 0;
                 //env_FIFO.set_low(buff[10], buff[12], buff[14]);
             }else if (buff[0] == 's' && buff[4] == 'h'){
                 cout << "\nrunning set_high()";
@@ -82,18 +97,16 @@ void serial_input_thread(){
                 ThisThread::sleep_for(1s);
                 l_new = stof(buff_l, &str_len);
 
+                for(int idx = 0; idx <= max_len; idx++) buff[idx] = 0;
+                len = 0;
+
                 env_FIFO.set_high(t_new, p_new, l_new);
             }
-
-            for(int idx = 0; idx <= max_len; idx++) buff[idx] = 0;
-            ThisThread::sleep_for(2s);
-            len = 0;
         }else{
             while(user_in.readable()){
                 user_in.read(&buff_in, 1);
-                buff[len] = buff_in;
+                buff[len++] = buff_in;
                 user_in.write(&buff_in, 1);
-                len++;
             }
         }
     }
