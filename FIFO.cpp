@@ -253,15 +253,32 @@ void FIFO::flush(){
 }
 
 void FIFO::set_high(float t, float p, float l){
+    cout << "\nOld upper limits" << endl;
     cout << endl;
-    cout << t_up << endl;
-    cout << p_up << endl;
-    cout << l_up << endl;
+    cout << "Temperature: " << t_up << endl;
+    cout << "Pressure: " << p_up << endl;
+    cout << "Light level: " << l_up << endl;
     t_up = t;
     p_up = p;
     l_up = l;
-    cout << t_up << endl;
-    cout << p_up << endl;
-    cout << l_up << endl;
+    cout << "New upper limits" << endl;
+    cout << "Temperature: " << t_up << endl;
+    cout << "Pressure: " << p_up << endl;
+    cout << "Light level: " << l_up << endl;
+    return;
+}
+
+void FIFO::set_low(float t, float p, float l){
+    cout << "\nOld lower limits" << endl;
+    cout << "Temperature: " << t_low << endl;
+    cout << "Pressure: " << p_low << endl;
+    cout << "Light level: " << l_low << endl;
+    t_low = t;
+    p_low = p;
+    l_low = l;
+    cout << "New lower limits" << endl;
+    cout << "Temperature: " << t_low << endl;
+    cout << "Pressure: " << p_low << endl;
+    cout << "Light level: " << l_low << endl;
     return;
 }

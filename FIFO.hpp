@@ -2,6 +2,9 @@
 ELEC351
 Authors: Pablo Pelaez and Angus McDowall
 Group: B
+****************************************
+void alarm() - Function that handles an alarm thread, outputting alarms when temp/pres/lux exceed certain boundaries
+void write_FIFO() - Function that handles a thread writing to the FIFO, taking an 
 */
 
 #ifndef __FIFO__
@@ -46,7 +49,7 @@ using namespace uop_msb;
         //User Switch
         DigitalIn userButton;
         //temperature upper/lower
-        float t_up = 30;
+        float t_up = 32;
         float t_low = 18;
         //pressure upper/lower
         float p_up = 1200;
