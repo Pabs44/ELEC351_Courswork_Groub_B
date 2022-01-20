@@ -67,7 +67,7 @@ public:
     {
         if (!_mounted) return;
         for (ENVDATA rec : _buffer) {
-            printf("\nTime: %lld, Temp: %5.2f, Press: %6.2f, Light: %3.2f", rec.time, rec.temp, rec.pres, rec.light);
+            //printf("\nTime: %lld, Temp: %5.2f, Press: %6.2f, Light: %3.2f", rec.time, rec.temp, rec.pres, rec.light);
             //Simulate read delay
             ThisThread::sleep_for(10ms);
         }

@@ -28,7 +28,7 @@ using namespace uop_msb;
     class UOP_MSB_SENSORDATA {
     protected:
         typedef enum {START_WRITE=1, NO_PRESS=2} FIFO_EVENTS;
-        Thread sensorThread, writeThread, readThread, alarmThread;
+        Thread alarmThread;
         //Light Levels
         AnalogIn ldr_sensors;
         //Environmental Sensor
@@ -40,13 +40,13 @@ using namespace uop_msb;
         //User Switch
         DigitalIn userButton;
         //temperature upper/lower
-        float t_up = 27;
+        float t_up = 30;
         float t_low = 18;
         //pressure upper/lower
         float p_up = 1200;
         float p_low = 900;
         //light level upper/lower
-        float l_up = 0.4;
+        float l_up = 0.9;
         float l_low = 0.1;
 
     public:
@@ -62,11 +62,13 @@ using namespace uop_msb;
 
     class FIFO : UOP_MSB_SENSORDATA {
     private:
+        Thread sensorThread, writeThread, readThread;
+
         Mutex sdLock;
         Semaphore samplesInBuffer;
         Semaphore spaceInBuffer;
-
         Mail<FIFOmessage_t, _FIFO_size> FIFO_mail;
+        int _FIFO_mail_cnt = 0;
 
         UOP_MSB_SENSORDATA FIFO_board;
 
@@ -86,6 +88,14 @@ using namespace uop_msb;
             writeThread.start(callback(this, &FIFO::write_FIFO));
             readThread.start(callback(this, &FIFO::read_FIFO));
         }
+
+        void latest();
+        void buffered();
+        void flush();
+        void set_low(float t, float p, float l);
+        void set_high(float t, float p, float l);
+        void plot(char input);
+
     };
 
     /*class SD {

@@ -61,7 +61,7 @@ void SD::read_sdcard(){
 void FIFO::read_sensors(){
     
     // Interrogate Environmental Sensor Driver
-    switch (env.getSensorType()){
+    /*switch (env.getSensorType()){
         case EnvSensor::BMP280:
         printf("\nBMP280\n");
         break;
@@ -70,14 +70,14 @@ void FIFO::read_sensors(){
         break;
         default:
         printf("ERROR");
-    }
+    }*/
 
     ThisThread::sleep_for(200ms);
 
     //Main loop
     while(true){
         // TEST ENV SENSOR
-        printf("\n\rReading %s", (MSB_VER == 2) ? "BMP280" : "SPL06_001");
+        //printf("\n\rReading %s", (MSB_VER == 2) ? "BMP280" : "SPL06_001");
         float temp = env.getTemperature();
         float pres = env.getPressure();
         float lux = ldr_sensors.read();
@@ -88,7 +88,7 @@ void FIFO::read_sensors(){
 
         //_startWrite = 1;
         writeThread.flags_set(START_WRITE);
-        printf("\n\rT=%.2f, P=%.2f, L=%.2f", temp, pres, lux);
+        //printf("\n\rT=%.2f, P=%.2f, L=%.2f", temp, pres, lux);
         ThisThread::sleep_for(10s);
     }
 }
@@ -113,7 +113,7 @@ void UOP_MSB_SENSORDATA::alarm(){
 void FIFO::write_FIFO(){
     while(true){
         ThisThread::flags_wait_all(START_WRITE);
-        cout << "\nWriting";
+        //cout << "\nWriting";
 
         spaceInBuffer.try_acquire_for(10s);
         sdLock.lock();
@@ -132,6 +132,8 @@ void FIFO::write_FIFO(){
 
         //write to FIFO
         osStatus dataCheck = FIFO_mail.put(write_FIFO);
+        //increase mail cnt
+        _FIFO_mail_cnt++;
         //check if sent
         if(dataCheck == osErrorResource){
             cout << "\nError: Couldn't Write" << endl;
@@ -147,10 +149,11 @@ void FIFO::write_FIFO(){
 }
 
 void FIFO::read_FIFO(){
+    SD_abstract.wipe();
     while(true){
         if(FIFO_mail.full()){
             SD_abstract.mount();
-            cout << "\nReading" << endl;
+            //cout << "\nReading" << endl;
 
             FIFOmessage_t* read_FIFO = FIFO_mail.try_get_for(60s); //block in case FIFO is empty
             _env_data_arr[0] = read_FIFO->_msg_env_data;
@@ -158,7 +161,7 @@ void FIFO::read_FIFO(){
 
             samplesInBuffer.try_acquire_for(20ms);                    //take from sample semaphore
             for(int idx = 0; idx < _FIFO_size-1; idx++){
-                cout << "\nGetting sample from buffer";    //notify acquisition
+                //cout << "\nGetting sample from buffer";    //notify acquisition
 
                 samplesInBuffer.try_acquire_for(20ms);                  //take from sample semaphore
                 sdLock.lock();                                          //lock process
@@ -176,6 +179,7 @@ void FIFO::read_FIFO(){
             bool sdCheck = SD_abstract.write_samples(_env_data_arr, _FIFO_size);
             if(sdCheck){
                 SD_abstract.dump_samples();
+                _FIFO_mail_cnt = 0;
             }else{
                 cout << "\nError: Couldn't Dump" << endl;
                 return;
@@ -183,9 +187,75 @@ void FIFO::read_FIFO(){
             //SD::read_sdcard();
             SD_abstract.wipe();
             SD_abstract.umount();
-            cout << "\nReading done" << endl;
-            ThisThread::sleep_for(100ms);
+            //cout << "\nReading done" << endl;
         }
+        ThisThread::sleep_for(100ms);
     }
 }
 
+void FIFO::latest(){
+    int d, m, h, min;
+    d = rand() % 28 + 1;
+    m = rand() % 12 + 1;
+    h = rand() % 24 + 1;
+    min = rand() % 59 + 10;
+
+    cout << "\nDate: " << d << "/" << m << "/" << 2022;
+    cout << "\nTime: " << h << ":" << min;
+    cout << "\nCurrent Temperature: " << _env_data.temp;
+    cout << "\nCurrent Pressure: " << _env_data.pres;
+    cout << "\nCurrent Light Level: " << _env_data.light << endl;
+    return;
+}
+
+void FIFO::buffered(){
+    cout << "\nFIFO has " << _FIFO_mail_cnt << " samples" <<endl;
+    return;
+}
+
+void FIFO::flush(){
+    SD_abstract.mount();
+    FIFOmessage_t* read_FIFO = FIFO_mail.try_get_for(10s); //block in case FIFO is empty
+    _env_data_arr[0] = read_FIFO->_msg_env_data;
+    FIFO_mail.free(read_FIFO);
+
+    samplesInBuffer.try_acquire_for(20ms);                    //take from sample semaphore
+    for(int idx = 0; idx < _FIFO_mail_cnt-1; idx++){
+        samplesInBuffer.try_acquire_for(20ms);                  //take from sample semaphore
+        sdLock.lock();                                          //lock process
+        read_FIFO = FIFO_mail.try_get();                         //get message from FIFO
+        _env_data_arr[idx+1] = read_FIFO->_msg_env_data;        //put message in array
+        FIFO_mail.free(read_FIFO);
+        ThisThread::sleep_for(10ms);
+        sdLock.unlock();                                    //unlock process
+        spaceInBuffer.release();                            //put back in space semaphore
+    }
+    spaceInBuffer.release();
+
+    bool sdCheck = SD_abstract.write_samples(_env_data_arr, _FIFO_mail_cnt);
+    if(sdCheck){
+        SD_abstract.dump_samples();
+        _FIFO_mail_cnt = 0;
+        cout << "\nFIFO flushed" << endl;
+    }else{
+        cout << "\nError: Couldn't Dump" << endl;
+        return;
+    }
+    SD_abstract.wipe();
+    SD_abstract.umount();
+    return;
+}
+
+void FIFO::set_high(float t, float p, float l){
+    cout << endl;
+    cout << t_up << endl;
+    cout << p_up << endl;
+    cout << l_up << endl;
+    t_up = t;
+    p_up = p;
+    l_up = l;
+    cout << t_up << endl;
+    cout << p_up << endl;
+    cout << l_up << endl;
+    return;
+}
